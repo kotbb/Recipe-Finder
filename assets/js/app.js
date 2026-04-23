@@ -145,7 +145,112 @@ function scrollToForm() {
   showPage('add-recipe');
 }
 
+// Backend endpoint used by edit/delete actions
+const RECIPE_API_URL = 'backend/API_Ops.php';
+
+function collectIngredientRows() {
+  const rows = document.querySelectorAll('#ingredientsList .ingredient-row');
+  const ingredients = [];
+
+  rows.forEach(row => {
+    const name = row.querySelector('.ingredient-name-input')?.value?.trim() || '';
+    const grams = row.querySelector('.ingredient-grams-input')?.value?.trim() || '';
+
+    if (!name && !grams) return;
+    ingredients.push({ name, grams });
+  });
+
+  return ingredients;
+}
+
+async function postRecipeAction(action, payload) {
+  const body = new URLSearchParams();
+
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value === undefined || value === null) return;
+    body.append(key, value);
+  });
+
+  const response = await fetch(`${RECIPE_API_URL}?action=${encodeURIComponent(action)}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+    },
+    body: body.toString()
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+
+  const data = await response.json();
+  if (!data.success) {
+    throw new Error(data.error || `Recipe ${action} failed`);
+  }
+
+  return data;
+}
+
+// Edit Recipe
+async function editRecipe(recipeId) {
+  const id = Number(recipeId || document.getElementById('editIndex')?.value);
+  if (!id) {
+    console.error('Recipe ID is required for editing.');
+    return null;
+  }
+
+  const name = document.getElementById('recipeName')?.value?.trim() || '';
+  const instructions = document.getElementById('instructions')?.value?.trim() || '';
+  const ingredients = collectIngredientRows();
+  const imagePath = document.getElementById('imagePreview')?.getAttribute('src') || '';
+
+  if (!name || !instructions || ingredients.length === 0) {
+    console.error('Name, ingredients, and instructions are required for editing.');
+    return null;
+  }
+
+  try {
+    const result = await postRecipeAction('update', {
+      id: String(id),
+      name,
+      ingredients: JSON.stringify(ingredients),
+      instructions,
+      image_path: imagePath
+    });
+
+    document.dispatchEvent(new CustomEvent('recipe:updated', { detail: { id, result } }));
+    return result;
+  } catch (error) {
+    console.error('Failed to update recipe:', error);
+    return null;
+  }
+}
+
+// Delete Recipe
+async function deleteRecipe(recipeId) {
+  const id = Number(recipeId);
+  if (!id) {
+    console.error('Recipe ID is required for deletion.');
+    return null;
+  }
+
+  try {
+    const result = await postRecipeAction('delete', { id: String(id) });
+
+    const recipeCard = document.querySelector(`[data-recipe-id="${id}"]`);
+    if (recipeCard) recipeCard.remove();
+
+    document.dispatchEvent(new CustomEvent('recipe:deleted', { detail: { id, result } }));
+    return result;
+  } catch (error) {
+    console.error('Failed to delete recipe:', error);
+    return null;
+  }
+}
+
 // Export Functions
 window.showPage = showPage;
 window.scrollToForm = scrollToForm;
 window.addIngredientRow = addIngredientRow;
+window.editRecipe = editRecipe;
+window.deleteRecipe = deleteRecipe;
