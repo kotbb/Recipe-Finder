@@ -2,8 +2,7 @@
   <div class="footer-inner">
     <div>
       <div class="footer-brand">
-        <div class="footer-brand-icon">🍳</div>
-        <span class="footer-brand-name">Recipe Manager</span>
+        <span class="header-title">Recipe <span>Finder</span></span>
       </div>
       <p class="footer-tagline">
         A beautifully crafted space to save, organise, and celebrate your favourite recipes from around the world.
@@ -18,8 +17,7 @@
   </div>
   <div class="footer-bottom">
     <div class="footer-bottom-inner">
-      <span class="footer-copy">&copy; <?php echo date('Y'); ?> Recipe Manager. All rights reserved.</span>
-      <span class="footer-credits">Featured recipes powered by <span>TheMealDB</span></span>
+      <span class="footer-copy">&copy; <?php echo date('Y'); ?> Recipe Finder. All rights reserved.</span>
     </div>
   </div>
 </footer>
@@ -45,6 +43,6 @@
   </div>
 </div>
 
-<script src="../assets/js/app.js"></script>
+<script src="assets/js/app.js"></script>
 </body>
 </html>

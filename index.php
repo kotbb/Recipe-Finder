@@ -2,10 +2,7 @@
 
 <main class="main-content">
 
-  <!-- ============================================================
-       FEATURED RECIPES — Powered by TheMealDB free API
-       Endpoint: https://www.themealdb.com/api/json/v1/1/filter.php?c=<Category>
-       ============================================================ -->
+  <!-- Featured Recipes Section -->
   <section id="featured" class="featured-section" aria-label="Featured recipes from around the world">
 
     <div class="section-header">
@@ -16,21 +13,12 @@
     </div>
 
     <p class="section-desc">
-      Browse handpicked recipes from around the world, powered by <strong>TheMealDB</strong>.
+      Browse handpicked recipes from around the world,
       Click any card to view full details.
     </p>
 
-    <!-- Category filter pills -->
-    <div class="featured-filters" id="featuredFilters" role="group" aria-label="Filter by category">
-      <button class="filter-btn active" data-cat="Chicken">🍗 Chicken</button>
-      <button class="filter-btn" data-cat="Beef">🥩 Beef</button>
-      <button class="filter-btn" data-cat="Seafood">🐟 Seafood</button>
-      <button class="filter-btn" data-cat="Vegetarian">🥦 Vegetarian</button>
-      <button class="filter-btn" data-cat="Pasta">🍝 Pasta</button>
-      <button class="filter-btn" data-cat="Dessert">🍮 Dessert</button>
-    </div>
-
-    <!-- Grid — filled by JS -->
+    
+    <!-- Grid - filled by JS -->
     <div id="featuredGrid" class="featured-grid" aria-live="polite">
       <!-- Skeleton loaders shown while fetching -->
     </div>
@@ -39,9 +27,7 @@
 
   <hr class="divider" />
 
-  <!-- ============================================================
-       ADD / EDIT RECIPE FORM
-       ============================================================ -->
+  <!-- Add Recipe Section -->
   <section id="add-recipe" class="form-section" aria-label="Add or edit a recipe">
 
     <div class="section-header" style="margin-bottom:28px">
@@ -54,7 +40,7 @@
     <div class="form-card">
 
       <div class="form-card-header">
-        <h2 id="formHeading">✦ Create Recipe</h2>
+        <h2 id="formHeading">Create Recipe</h2>
         <p id="formSubheading">Fill in the details below to save your recipe to the collection.</p>
       </div>
 
@@ -112,7 +98,7 @@
             <!-- Form Actions -->
             <div class="form-actions">
               <button type="submit" class="btn btn-primary">
-                <span>✦</span> <span id="submitBtnText">Save Recipe</span>
+                <span id="submitBtnText">Save Recipe</span>
               </button>
               <button type="button" class="btn btn-secondary" onclick="resetForm()">
                 Clear Form
@@ -128,9 +114,8 @@
 
   <hr class="divider" />
 
-  <!-- ============================================================
-       MY RECIPES — empty until user adds
-       ============================================================ -->
+
+<!-- My Recipes Section -->
   <section id="recipes-list" class="recipes-section" aria-label="My saved recipes">
 
     <div class="section-header">
@@ -142,7 +127,7 @@
     </div>
 
     <div class="recipes-grid" id="recipesGrid">
-      <!-- Populated by JS — starts empty -->
+
     </div>
 
   </section>
