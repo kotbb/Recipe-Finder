@@ -1,40 +1,74 @@
 <?php
+class Recipe
+{
+    public const NAME_MAX_LENGTH = 255;
+    public const IMAGE_PATH_MAX_LENGTH = 500;
+    public const TEXT_MAX_LENGTH = 65535;
 
-namespace App\Entity; // Adjust the namespace to fit your project structure
-
-use DateTimeInterface;
-use DateTime;
-
-class Recipe {
-    
-    private int $id;
-
+    private ?int $id = null;
     private string $name;
-
     private string $ingredients;
-
     private string $instructions;
-
-
     private ?string $imagePath = null;
 
-    private ?DateTimeInterface $createdAt = null;
-
-    
     public function __construct(string $name, string $ingredients, string $instructions)
     {
-        $this->name = $name;
-        $this->ingredients = $ingredients;
+        $this->name         = $name;
+        $this->ingredients  = $ingredients;
         $this->instructions = $instructions;
     }
 
-    // --- Getters and Setters ---
+    public static function validateApiPayload(string $name, string $ingredients, string $instructions, string $imagePathRaw): ?string
+    {
+        if ($name === '') {
+            return 'Recipe name is required.';
+        }
+        if (mb_strlen($name) > self::NAME_MAX_LENGTH) {
+            return 'Recipe name must be at most ' . self::NAME_MAX_LENGTH . ' characters.';
+        }
+
+        if ($ingredients === '') {
+            return 'Ingredients are required.';
+        }
+        if (mb_strlen($ingredients) > self::TEXT_MAX_LENGTH) {
+            return 'Ingredients data is too long.';
+        }
+        $decoded = json_decode($ingredients, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return 'Ingredients must be valid JSON.';
+        }
+        if (!is_array($decoded) || count($decoded) < 1) {
+            return 'Add at least one ingredient.';
+        }
+        foreach ($decoded as $item) {
+            if (!is_array($item)) {
+                return 'Each ingredient must be an object with a name.';
+            }
+            $ingName = isset($item['name']) ? trim((string) $item['name']) : '';
+            if ($ingName === '') {
+                return 'Each ingredient must have a non-empty name.';
+            }
+        }
+
+        if ($instructions === '') {
+            return 'Instructions are required.';
+        }
+        if (mb_strlen($instructions) > self::TEXT_MAX_LENGTH) {
+            return 'Instructions are too long.';
+        }
+
+        $imagePath = trim($imagePathRaw);
+        if ($imagePath !== '' && mb_strlen($imagePath) > self::IMAGE_PATH_MAX_LENGTH) {
+            return 'Image path must be at most ' . self::IMAGE_PATH_MAX_LENGTH . ' characters.';
+        }
+
+        return null;
+    }
 
     public function getId(): ?int
     {
         return $this->id;
     }
-
     public function setId(?int $id): self
     {
         $this->id = $id;
@@ -45,10 +79,9 @@ class Recipe {
     {
         return $this->name;
     }
-
-    public function setName(string $name): self
+    public function setName(string $v): self
     {
-        $this->name = $name;
+        $this->name = $v;
         return $this;
     }
 
@@ -56,10 +89,9 @@ class Recipe {
     {
         return $this->ingredients;
     }
-
-    public function setIngredients(string $ingredients): self
+    public function setIngredients(string $v): self
     {
-        $this->ingredients = $ingredients;
+        $this->ingredients = $v;
         return $this;
     }
 
@@ -67,10 +99,9 @@ class Recipe {
     {
         return $this->instructions;
     }
-
-    public function setInstructions(string $instructions): self
+    public function setInstructions(string $v): self
     {
-        $this->instructions = $instructions;
+        $this->instructions = $v;
         return $this;
     }
 
@@ -78,21 +109,13 @@ class Recipe {
     {
         return $this->imagePath;
     }
-
-    public function setImagePath(?string $imagePath): self
+    public function setImagePath(?string $v): self
     {
-        $this->imagePath = $imagePath;
-        return $this;
-    }
-
-    public function getCreatedAt(): ?DateTimeInterface
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(?DateTimeInterface $createdAt): self
-    {
-        $this->createdAt = $createdAt;
+        if ($v === null || trim($v) === '') {
+            $this->imagePath = null;
+        } else {
+            $this->imagePath = trim($v);
+        }
         return $this;
     }
 }

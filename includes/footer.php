@@ -42,7 +42,9 @@
     </div>
   </div>
 </div>
-
 <script src="assets/js/app.js"></script>
+<script src="assets/js/myRecipes.js"></script>
+<script src="assets/js/API_Ops.js"></script>
+<script src="assets/js/featuredRecipes.js"></script>
 </body>
 </html>

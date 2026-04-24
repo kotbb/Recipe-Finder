@@ -25,21 +25,18 @@ if($check !== false) {
     $uploadOk = 0;
 }
 
-// Check if file already exists
-if (file_exists($target_file)) {
-    $errorMessage = "Sorry, file already exists. Please rename your image and try again.";
+
+// limit size to 10 MB
+$maxBytes = 10 * 1024 * 1024;
+if ($_FILES["recipe_image"]["size"] > $maxBytes) {
+    $errorMessage = "Sorry, your file is too large (max 10 MB).";
     $uploadOk = 0;
 }
 
-// limit size to 2mb
-if ($_FILES["recipe_image"]["size"] > 2000000) {
-    $errorMessage = "Sorry, your file is too large.";
-    $uploadOk = 0;
-}
-
-// validate file formats
-if($imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg" && $imageFileType != "gif" ) {
-    $errorMessage = "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+// validate file formats (matches index.php + client-side checks)
+$allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+if (!in_array($imageFileType, $allowed, true)) {
+    $errorMessage = "Sorry, only JPG, JPEG, PNG, GIF & WEBP files are allowed.";
     $uploadOk = 0;
 }
 
