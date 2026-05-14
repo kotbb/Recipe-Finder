@@ -1,0 +1,17 @@
+# 2. Install PHP dependencies
+composer install
+
+# 3. Install Node dependencies
+npm install
+
+# 4. Setup environment file
+cp .env.example .env
+
+# 5. Generate app key
+php artisan key:generate
+
+# 6. Run migrations (creates the database)
+php artisan migrate
+
+# 7. Build assets
+npm run build
