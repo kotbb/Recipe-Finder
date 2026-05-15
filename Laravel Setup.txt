@@ -13,5 +13,8 @@ php artisan key:generate
 # 6. Run migrations (creates the database)
 php artisan migrate
 
-# 7. Build assets
+# 7 
+php artisan storage:link
+
+# 8. Build assets
 npm run build
