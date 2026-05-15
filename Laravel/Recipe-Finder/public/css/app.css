@@ -472,6 +472,12 @@ textarea{resize:vertical;min-height:140px;line-height:1.65}
 .modal-ingredient-tag{font-size:.82rem;font-weight:500;color:var(--olive);background:rgba(74,82,64,.08);border:1px solid rgba(74,82,64,.15);padding:5px 14px;border-radius:99px}
 .modal-instructions{font-size:.92rem;color:var(--ink-soft);line-height:1.75;margin-bottom:28px;white-space:pre-wrap}
 .modal-footer{display:flex;justify-content:flex-end;gap:10px;padding-top:16px;border-top:1px solid var(--cream-dark)}
+.confirm-modal{background:var(--white);border-radius:var(--radius-lg);max-width:440px;width:100%;overflow:hidden;box-shadow:var(--shadow-lg);animation:modalIn .25s cubic-bezier(.4,0,.2,1)}
+.confirm-modal-icon{width:52px;height:52px;margin:30px auto 0;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(148,63,42,.1);border:1px solid rgba(148,63,42,.24);color:var(--rust);font-weight:700;font-size:1.35rem}
+.confirm-modal-body{padding:22px 30px 30px;text-align:center}
+.confirm-modal .modal-title{margin-bottom:10px}
+.confirm-modal .modal-instructions{margin-bottom:24px}
+.confirm-modal .modal-footer{justify-content:center}
 
 /* =========================================
    TOAST

@@ -9,6 +9,7 @@ const UPLOAD_MAX_BYTES = 5 * 1024 * 1024;
 const UPLOAD_ALLOWED_EXT = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp']);
 
 let uploadedImagePath = null;
+let pendingDeleteRecipeId = null;
 
 function setUploadedImagePath(path) {
   uploadedImagePath = path || null;
@@ -94,7 +95,14 @@ async function loadMyRecipes() {
 }
 
 async function deleteRecipe(id) {
-  if (!confirm('Delete this recipe? This cannot be undone.')) return;
+  pendingDeleteRecipeId = id;
+  document.getElementById('deleteConfirmModal')?.classList.add('open');
+}
+
+async function confirmDeleteRecipe() {
+  if (!pendingDeleteRecipeId) return;
+
+  const id = pendingDeleteRecipeId;
 
   try {
     await deleteMyRecipe(id);
@@ -102,7 +110,16 @@ async function deleteRecipe(id) {
     loadMyRecipes();
   } catch (err) {
     showToast(`${err.message}`, 'error');
+  } finally {
+    closeDeleteConfirm();
   }
+}
+
+function closeDeleteConfirm(e) {
+  if (e && e.target !== document.getElementById('deleteConfirmModal')) return;
+
+  pendingDeleteRecipeId = null;
+  document.getElementById('deleteConfirmModal')?.classList.remove('open');
 }
 
 function populateEditForm(safeJson) {
@@ -124,11 +141,15 @@ function populateEditForm(safeJson) {
 
   const heading = document.getElementById('formHeading');
   const subheading = document.getElementById('formSubheading');
+  const sectionTitle = document.getElementById('recipeFormSectionTitle');
   const btnText = document.getElementById('submitBtnText');
+  const resetBtnText = document.getElementById('resetBtnText');
 
   if (heading) heading.textContent = 'Edit Recipe';
   if (subheading) subheading.textContent = 'Update the details below and save your changes.';
+  if (sectionTitle) sectionTitle.textContent = 'Edit Recipe';
   if (btnText) btnText.textContent = 'Update Recipe';
+  if (resetBtnText) resetBtnText.textContent = 'Cancel Edit';
 
   const list = document.getElementById('ingredientsList');
 
@@ -175,7 +196,7 @@ function populateEditForm(safeJson) {
     if (filename) filename.textContent = recipe.image_path.split('/').pop();
   }
 
-  showPage('add-recipe');
+  showPage('edit-recipe');
 }
 
 function updateRecipeStats(recipes) {
@@ -208,14 +229,18 @@ function myRecipeCardHTML(r) {
     ? `<img class="recipe-card-image" src="${escHtml(r.image_path)}" alt="${escHtml(r.name)}" loading="lazy" />`
     : `<div class="recipe-card-image-placeholder">🍽️<span class="recipe-card-badge">No photo</span></div>`;
 
-  let ingPreview = '';
+  let ingredientTags = '';
+  let ingredientCount = 0;
 
   try {
     const parsed = JSON.parse(r.ingredients);
-    ingPreview = parsed.slice(0, 3).map(i => i.name || i).join(', ');
-    if (parsed.length > 3) ingPreview += ` +${parsed.length - 3} more`;
+    ingredientCount = parsed.length;
+    ingredientTags = parsed.slice(0, 3).map(i => `<span class="ingredient-tag">${escHtml(i.name || i)}</span>`).join('');
+    if (parsed.length > 3) {
+      ingredientTags += `<span class="ingredient-tag more">+${parsed.length - 3} more</span>`;
+    }
   } catch {
-    ingPreview = String(r.ingredients).slice(0, 80);
+    ingredientTags = `<span class="ingredient-tag">${escHtml(String(r.ingredients).slice(0, 80))}</span>`;
   }
 
   const safeJson = escAttr(JSON.stringify(r));
@@ -225,13 +250,16 @@ function myRecipeCardHTML(r) {
       <div style="position:relative">${img}</div>
       <div class="recipe-card-body">
         <h3 class="recipe-card-name">${escHtml(r.name)}</h3>
-        <p style="font-size:.85rem;color:var(--ink-muted);margin-bottom:14px;flex:1">
-          ${escHtml(ingPreview)}
-        </p>
-        <div class="recipe-card-actions">
-          <button class="btn btn-outline btn-sm" onclick="openMyRecipeModal('${safeJson}')">View</button>
-          <button class="btn btn-secondary btn-sm" onclick="populateEditForm('${safeJson}')">Edit</button>
-          <button class="btn btn-danger btn-sm" onclick="deleteRecipe(${r.id})">Delete</button>
+        <div class="recipe-card-ingredients" aria-label="${ingredientCount || 'Recipe'} ingredients">
+          ${ingredientTags}
+        </div>
+        <p class="recipe-card-instructions">${escHtml(r.instructions || '')}</p>
+        <div class="recipe-card-footer">
+          <div class="recipe-card-actions">
+            <button type="button" class="btn btn-outline btn-sm" onclick="openMyRecipeModal('${safeJson}')">View</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="populateEditForm('${safeJson}')">Edit</button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="deleteRecipe(${r.id})">Delete</button>
+          </div>
         </div>
       </div>
     </article>`;
@@ -320,11 +348,15 @@ function resetForm() {
 
   const heading = document.getElementById('formHeading');
   const subheading = document.getElementById('formSubheading');
+  const sectionTitle = document.getElementById('recipeFormSectionTitle');
   const btnText = document.getElementById('submitBtnText');
+  const resetBtnText = document.getElementById('resetBtnText');
 
   if (heading) heading.textContent = 'Create Recipe';
   if (subheading) subheading.textContent = 'Fill in the details below to save your recipe to the collection.';
+  if (sectionTitle) sectionTitle.textContent = 'Add a New Recipe';
   if (btnText) btnText.textContent = 'Save Recipe';
+  if (resetBtnText) resetBtnText.textContent = 'Clear Form';
 
   const previewWrap = document.getElementById('imagePreviewWrap');
   const preview = document.getElementById('imagePreview');
@@ -339,6 +371,10 @@ function resetForm() {
   if (list) {
     list.innerHTML = '';
     addIngredientRow();
+  }
+
+  if (location.hash === '#edit-recipe') {
+    showPage('add-recipe');
   }
 }
 
@@ -510,6 +546,8 @@ function escAttr(str) {
 
 window.loadMyRecipes = loadMyRecipes;
 window.deleteRecipe = deleteRecipe;
+window.confirmDeleteRecipe = confirmDeleteRecipe;
+window.closeDeleteConfirm = closeDeleteConfirm;
 window.populateEditForm = populateEditForm;
 window.updateRecipeStats = updateRecipeStats;
 window.openMyRecipeModal = openMyRecipeModal;

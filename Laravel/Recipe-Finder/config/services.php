@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'dummyjson' => [
+        'recipes_url' => env('DUMMYJSON_RECIPES_URL', 'https://dummyjson.com/recipes'),
+    ],
+
 ];

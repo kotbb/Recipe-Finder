@@ -1,0 +1,10 @@
+Team Number: TODO
+
+Member 1: Full Name - Student ID
+Member 2: Full Name - Student ID
+Member 3: Full Name - Student ID
+Member 4: Full Name - Student ID
+Member 5: Full Name - Student ID
+Member 6: Full Name - Student ID
+Member 7: Full Name - Student ID
+Member 8: Full Name - Student ID

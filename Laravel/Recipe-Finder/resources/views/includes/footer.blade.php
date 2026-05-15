@@ -42,3 +42,18 @@
     </div>
   </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay" id="deleteConfirmModal" onclick="closeDeleteConfirm(event)">
+  <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="deleteConfirmTitle">
+    <div class="confirm-modal-icon">!</div>
+    <div class="confirm-modal-body">
+      <h2 class="modal-title" id="deleteConfirmTitle">Delete recipe?</h2>
+      <p class="modal-instructions">This recipe will be removed from your collection. This action cannot be undone.</p>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" onclick="closeDeleteConfirm()">Cancel</button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="confirmDeleteRecipe()">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>

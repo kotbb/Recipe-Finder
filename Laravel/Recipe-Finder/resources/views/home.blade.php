@@ -39,7 +39,7 @@
     <div class="section-header" style="margin-bottom:28px">
       <div>
         <div class="section-eyebrow">Your Kitchen</div>
-        <h2 class="section-title">Add a New Recipe</h2>
+        <h2 class="section-title" id="recipeFormSectionTitle">Add a New Recipe</h2>
       </div>
     </div>
 
@@ -65,6 +65,7 @@
 
         <form id="recipeForm" action="{{ route('recipes.store') }}" method="POST" enctype="multipart/form-data" novalidate>
           @csrf
+          <input type="hidden" id="editIndex" value="" />
 
           <div class="form-grid">
 
@@ -92,10 +93,6 @@
               </div>
 
               <div class="ingredients-list" id="ingredientsList"></div>
-
-              <button type="button" class="add-ingredient-trigger" onclick="addIngredientRow()">
-                <span>＋</span> Add another ingredient
-              </button>
 
               {{-- Hidden field — collectIngredients() fills this before submit --}}
               <input type="hidden" id="ingredientsHidden" name="ingredients" value="{{ old('ingredients') }}" />
@@ -131,7 +128,7 @@
                   id="recipeImage"
                   name="image_path"
                   accept="image/*"
-                  onchange="previewImage(this)"
+                  onchange="handleImageUpload(this)"
                 />
                 <div class="upload-icon">📷</div>
                 <p><strong>Click to upload</strong> or drag &amp; drop</p>
@@ -154,7 +151,7 @@
                 <span id="submitBtnText">Save Recipe</span>
               </button>
               <button type="button" class="btn btn-secondary" onclick="resetForm()">
-                Clear Form
+                <span id="resetBtnText">Clear Form</span>
               </button>
             </div>
 
@@ -180,6 +177,16 @@
 
     <div class="recipes-grid" id="recipesGrid">
       @forelse ($recipes as $recipe)
+        @php
+          $recipePayload = [
+              'id' => $recipe->id,
+              'name' => $recipe->name,
+              'ingredients' => $recipe->ingredients,
+              'instructions' => $recipe->instructions,
+              'image_path' => $recipe->image_url,
+          ];
+          $safeRecipeJson = e(json_encode($recipePayload));
+        @endphp
         <article class="recipe-card">
           @if ($recipe->image_path)
             <img class="recipe-card-image" src="{{ Storage::url($recipe->image_path) }}" alt="{{ $recipe->name }}" loading="lazy" />
@@ -189,18 +196,25 @@
 
           <div class="recipe-card-body">
             <h3 class="recipe-card-name">{{ $recipe->name }}</h3>
-            <p style="font-size:.85rem;color:var(--ink-muted);margin-bottom:14px;flex:1">
-            {{ Str::limit(collect($recipe->ingredients)->pluck('name')->implode(', '), 80) }}
-            </p>
-            <div class="recipe-card-actions">
-              <a href="{{ route('recipes.show', $recipe->id) }}" class="btn btn-outline btn-sm">View</a>
-              <a href="{{ route('recipes.edit', $recipe->id) }}" class="btn btn-secondary btn-sm">Edit</a>
-              <form action="{{ route('recipes.destroy', $recipe->id) }}" method="POST"
-                    onsubmit="return confirm('Delete this recipe?')">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-              </form>
+            @php
+              $ingredients = json_decode($recipe->ingredients, true);
+              $ingredients = is_array($ingredients) ? $ingredients : [];
+            @endphp
+            <div class="recipe-card-ingredients">
+              @foreach (array_slice($ingredients, 0, 3) as $ingredient)
+                <span class="ingredient-tag">{{ $ingredient['name'] ?? $ingredient }}</span>
+              @endforeach
+              @if (count($ingredients) > 3)
+                <span class="ingredient-tag more">+{{ count($ingredients) - 3 }} more</span>
+              @endif
+            </div>
+            <p class="recipe-card-instructions">{{ $recipe->instructions }}</p>
+            <div class="recipe-card-footer">
+              <div class="recipe-card-actions">
+                <button type="button" class="btn btn-outline btn-sm" onclick="openMyRecipeModal('{{ $safeRecipeJson }}')">View</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="populateEditForm('{{ $safeRecipeJson }}')">Edit</button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="deleteRecipe({{ $recipe->id }})">Delete</button>
+              </div>
             </div>
           </div>
         </article>

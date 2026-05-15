@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="csrf-token" content="{{ csrf_token() }}" />
   <title>Recipe Finder</title>
   <link rel="stylesheet" href="{{ asset('css/app.css') }}" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -18,9 +19,9 @@
 @include('includes.footer')
 
 <script src="{{ asset('js/app.js') }}"></script>
-{{-- <script src="{{ asset('js/myRecipes.js') }}"></script> --}}
-{{-- <script src="{{ asset('js/API_Ops.js') }}"></script> --}}
-{{-- <script src="{{ asset('js/featuredRecipes.js') }}"></script> --}}
+<script src="{{ asset('js/API_Ops.js') }}"></script>
+<script src="{{ asset('js/featuredRecipes.js') }}"></script>
+<script src="{{ asset('js/myRecipes.js') }}"></script>
 
 </body>
 </html>

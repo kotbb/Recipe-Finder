@@ -1,7 +1,8 @@
 'use strict';
 
 // Page IDs
-const PAGE_IDS = ['featured', 'add-recipe', 'recipes-list'];
+const PAGE_IDS = ['featured', 'add-recipe', 'edit-recipe', 'recipes-list'];
+const SECTION_IDS = ['featured', 'add-recipe', 'recipes-list'];
 const DEFAULT_PAGE = 'featured';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -82,6 +83,9 @@ function initPageRouter() {
       if (!PAGE_IDS.includes(id)) return;
 
       event.preventDefault();
+      if (id === 'add-recipe' && document.getElementById('editIndex')?.value && window.resetForm) {
+        window.resetForm();
+      }
       showPage(id);
     });
   });
@@ -98,14 +102,15 @@ function initPageRouter() {
 // Show Page
 function showPage(id, options = {}) {
   if (!PAGE_IDS.includes(id)) id = DEFAULT_PAGE;
+  const visibleSectionId = id === 'edit-recipe' ? 'add-recipe' : id;
 
-  PAGE_IDS.forEach(pid => {
+  SECTION_IDS.forEach(pid => {
     const section = document.getElementById(pid);
-    if (section) section.style.display = (pid === id) ? '' : 'none';
+    if (section) section.style.display = (pid === visibleSectionId) ? '' : 'none';
   });
 
   const hero = document.querySelector('.page-hero');
-  if (hero) hero.style.display = (id === 'featured') ? '' : 'none';
+  if (hero) hero.style.display = (visibleSectionId === 'featured') ? '' : 'none';
 
   document.querySelectorAll('.divider').forEach(divider => {
     divider.style.display = 'none';
@@ -113,7 +118,7 @@ function showPage(id, options = {}) {
 
   document.querySelectorAll('.nav-link').forEach(link => {
     const href = link.getAttribute('href') || '';
-    link.classList.toggle('active', href === '#' + id);
+    link.classList.toggle('active', href === '#' + visibleSectionId);
   });
 
   if (!options.skipHashUpdate) {
@@ -125,6 +130,9 @@ function showPage(id, options = {}) {
 
 // Scroll to Form
 function scrollToForm() {
+  if (document.getElementById('editIndex')?.value && window.resetForm) {
+    window.resetForm();
+  }
   showPage('add-recipe');
 }
 
