@@ -34,24 +34,22 @@
         <div class="form-group full-width" style="margin-bottom:28px">
           <label style="font-weight:600;font-size:1rem;margin-bottom:10px;display:block;">Ingredients</label>
 
+        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;">
           @php
-            $ingredients = json_decode($recipe->ingredients, true);
-          @endphp
-
-          @if (is_array($ingredients))
-            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;">
-              @foreach ($ingredients as $item)
-                <li style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface-alt);border-radius:8px;">
-                  <span style="flex:1;">{{ $item['name'] ?? '' }}</span>
-                  @if (!empty($item['grams']) && $item['grams'] !== '0')
-                    <span style="color:var(--ink-muted);font-size:.85rem;">{{ $item['grams'] }}g</span>
-                  @endif
-                </li>
-              @endforeach
-            </ul>
-          @else
-            <p style="color:var(--ink-muted);">{{ $recipe->ingredients }}</p>
-          @endif
+          $ings = $recipe->ingredients;
+          if (is_string($ings)) $ings = json_decode($ings, true);
+          if (is_string($ings)) $ings = json_decode($ings, true); // double-encodeds
+          if (!is_array($ings)) $ings = [];
+        @endphp
+      @foreach ($ings as $item)
+      <li style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface-alt);border-radius:8px;">
+        <span style="flex:1;">{{ $item['name'] ?? '' }}</span>
+        @if (!empty($item['grams']) && $item['grams'] !== '0')
+          <span style="color:var(--ink-muted);font-size:.85rem;">{{ $item['grams'] }}g</span>
+        @endif
+      </li>
+    @endforeach
+    </ul>
         </div>
 
         {{-- Instructions --}}

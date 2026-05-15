@@ -57,18 +57,33 @@
             </div>
 
             {{-- Ingredients --}}
+            {{-- Normalise the value: old() is already a JSON string; $recipe->ingredients  --}}
+            {{-- may be an array (cast) or a double-encoded string (legacy bad saves).      --}}
+            @php
+              if (old('ingredients')) {
+                  $ingredientsJson = old('ingredients');
+              } else {
+                  $ings = $recipe->ingredients;
+                  // Handle legacy double-encoded strings in the DB
+                  if (is_string($ings)) $ings = json_decode($ings, true);
+                  if (is_string($ings)) $ings = json_decode($ings, true);
+                  if (!is_array($ings)) $ings = [];
+                  $ingredientsJson = json_encode($ings);
+              }
+            @endphp
             <div class="form-group full-width ingredients-section">
               <div class="ingredients-header">
                 <label>Ingredients <span class="req">*</span></label>
               </div>
 
-              <div class="ingredients-list" id="ingredientsList"></div>
+              <div class="ingredients-list" id="ingredientsList" data-managed="true"></div>
 
               <button type="button" class="add-ingredient-trigger" onclick="addIngredientRow()">
                 <span>＋</span> Add another ingredient
               </button>
 
-              <input type="hidden" id="ingredientsHidden" name="ingredients" value="{{ old('ingredients', $recipe->ingredients) }}" />
+              <input type="hidden" id="ingredientsHidden" name="ingredients"
+                value="{{ $ingredientsJson }}" />
 
               @error('ingredients')
                 <p style="color:#c00;font-size:.85rem;margin-top:4px;">{{ $message }}</p>
@@ -143,35 +158,69 @@
 </main>
 
 <script>
-// Pre-fill ingredient rows from saved data
 document.addEventListener('DOMContentLoaded', function () {
-  const hidden = document.getElementById('ingredientsHidden');
   const list   = document.getElementById('ingredientsList');
-  if (!hidden || !list) return;
-
-  let ingredients = [];
-  try { ingredients = JSON.parse(hidden.value); } catch (e) {}
-
-  if (Array.isArray(ingredients) && ingredients.length > 0) {
-    ingredients.forEach(item => {
-      addIngredientRow(item.name || '', item.grams || '');
-    });
-  } else {
-    addIngredientRow();
-  }
-});
-
-// Collect rows into hidden field before submit
-document.querySelector('form')?.addEventListener('submit', function () {
-  const rows = document.querySelectorAll('#ingredientsList .ingredient-row');
-  const ingredients = [];
-  rows.forEach(row => {
-    const name  = row.querySelector('.ingredient-name-input')?.value.trim();
-    const grams = row.querySelector('.ingredient-grams-input')?.value.trim();
-    if (name) ingredients.push({ name, grams: grams || '0' });
-  });
   const hidden = document.getElementById('ingredientsHidden');
-  if (hidden) hidden.value = JSON.stringify(ingredients);
+  if (!list || !hidden) return;
+
+  function makeRow(name, grams) {
+    const div = document.createElement('div');
+    div.className = 'ingredient-row';
+    div.innerHTML = `
+      <div class="ingredient-input-wrap">
+        <input type="text" class="ingredient-name-input" placeholder="Enter ingredient..." autocomplete="off" value="${name || ''}" />
+      </div>
+      <div class="gram-input">
+        <input type="number" class="ingredient-grams-input" placeholder="0" min="0" max="99999" value="${grams || ''}" />
+        <span class="gram-unit">g</span>
+      </div>
+      <button type="button" class="btn-icon btn-add-row" title="Add row">＋</button>
+      <button type="button" class="btn-icon btn-delete-row" title="Remove">✕</button>
+    `;
+    return div;
+  }
+
+  window.addIngredientRow = function () {
+    const row = makeRow('', '');
+    list.appendChild(row);
+    row.querySelector('.ingredient-name-input')?.focus();
+  };
+
+  list.addEventListener('click', function (e) {
+    if (e.target.closest('.btn-add-row')) {
+      window.addIngredientRow();
+    }
+    if (e.target.closest('.btn-delete-row')) {
+      const row = e.target.closest('.ingredient-row');
+      if (list.children.length > 1) row?.remove();
+    }
+  });
+
+  let saved = [];
+  try {
+    saved = JSON.parse(hidden.value);
+    // Handle legacy double-encoded strings that may still be in the DB
+    if (typeof saved === 'string') saved = JSON.parse(saved);
+  } catch (e) { console.log('parse error', e); }
+
+  list.innerHTML = '';
+  if (Array.isArray(saved) && saved.length > 0) {
+    saved.forEach(item => list.appendChild(makeRow(item.name, item.grams)));
+  } else {
+    list.appendChild(makeRow('', ''));
+  }
+
+  document.querySelector('form')?.addEventListener('submit', function () {
+    const ingredients = [];
+    list.querySelectorAll('.ingredient-row').forEach(row => {
+      const name  = row.querySelector('.ingredient-name-input')?.value.trim();
+      const grams = row.querySelector('.ingredient-grams-input')?.value.trim();
+      if (name) ingredients.push({ name, grams: grams || '0' });
+    });
+    if (ingredients.length > 0) {
+      hidden.value = JSON.stringify(ingredients);
+    }
+  });
 });
 
 function previewImage(input) {

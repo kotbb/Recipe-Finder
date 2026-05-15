@@ -190,7 +190,7 @@
           <div class="recipe-card-body">
             <h3 class="recipe-card-name">{{ $recipe->name }}</h3>
             <p style="font-size:.85rem;color:var(--ink-muted);margin-bottom:14px;flex:1">
-              {{ Str::limit($recipe->ingredients, 80) }}
+            {{ Str::limit(collect($recipe->ingredients)->pluck('name')->implode(', '), 80) }}
             </p>
             <div class="recipe-card-actions">
               <a href="{{ route('recipes.show', $recipe->id) }}" class="btn btn-outline btn-sm">View</a>

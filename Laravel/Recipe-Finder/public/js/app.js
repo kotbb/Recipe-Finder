@@ -30,7 +30,10 @@ const INGREDIENT_ROW_HTML = `
 function renderIngredientsShape() {
   const list = document.getElementById('ingredientsList');
   if (!list) return;
-  list.innerHTML = INGREDIENT_ROW_HTML;
+  if (list.dataset.managed) return;
+  if (list.children.length === 0) {
+    list.innerHTML = INGREDIENT_ROW_HTML;
+  }
   bindIngredientRowButtons(list);
 }
 

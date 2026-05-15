@@ -14,4 +14,7 @@ class Recipe extends Model
         'instructions',
         'image_path',
     ];
+    protected $casts = [
+    'ingredients' => 'array',
+];
 }
